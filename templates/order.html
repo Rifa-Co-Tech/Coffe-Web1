@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Pesanan</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        .shop-section {
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            margin: 20px auto;
+            max-width: 600px;
+            padding: 20px;
+        }
+
+        .shop-section h2 {
+            color: #444;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+            color: #555;
+        }
+
+        li:last-child {
+            border-bottom: none;
+        }
+
+        .total {
+            text-align: center;
+            font-size: 1.3em;
+            margin-top: 30px;
+            color: #222;
+        }
+
+        a {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            text-decoration: none;
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 6px;
+            width: 150px;
+            margin-left: auto;
+            margin-right: auto;
+            transition: background-color 0.3s ease;
+        }
+
+        a:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>🛒 Daftar Pesanan</h1>
+
+    {% for shop_id, items in cart.items() %}
+        <div class="shop-section">
+            <h2>Toko ID {{ shop_id }}</h2>
+            <ul>
+                {% for item in items %}
+                <li>
+                    {{ item['item']['name'] }} – {{ item['quantity'] }}x – <strong>Rp{{ item['item']['price'] }}</strong>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endfor %}
+
+    <div class="total">
+        <h3>Total: Rp{{ total }}</h3>
+    </div>
+
+    <a href="/">⬅ Kembali</a>
+</body>
+</html>

@@ -1,0 +1,213 @@
+<!DOCTYPE html> 
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KopiGo</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    
+    <style>
+        /* 🎨 Gaya tombol keranjang dengan animasi */
+        .cart-button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #ff9800;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .cart-button.clicked {
+            animation: pop 0.4s ease;
+        }
+
+        @keyframes pop {
+            0% { transform: scale(1); box-shadow: none; }
+            50% { transform: scale(1.15); box-shadow: 0 0 10px #ff9800; }
+            100% { transform: scale(1); box-shadow: none; }
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+        }
+
+        .header {
+            background-color: #6f4e37;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-form {
+            margin-top: 10px;
+        }
+
+        .search-form input[type="text"] {
+            padding: 10px;
+            width: 60%;
+            border: none;
+            border-radius: 8px;
+        }
+
+        .search-form button {
+            padding: 10px 20px;
+            border: none;
+            background-color: #ff914d;
+            color: white;
+            border-radius: 8px;
+            margin-left: 8px;
+            cursor: pointer;
+        }
+
+        .sort-buttons {
+            margin-top: 10px;
+        }
+
+        .sort-buttons a {
+            margin: 0 10px;
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .shop-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .shop-card {
+            background-color: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .shop-card h2 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        .rating, .distance {
+            font-size: 0.9em;
+            color: #777;
+        }
+
+        .menu-item {
+            margin-top: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .menu-item:last-child {
+            border-bottom: none;
+        }
+
+        .menu-item span {
+            display: inline-block;
+        }
+
+        .menu-item form {
+            display: flex;
+            gap: 8px;
+        }
+
+        .menu-item input[type="number"] {
+            width: 50px;
+            padding: 5px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        .menu-item button {
+            padding: 6px 10px;
+            background-color: #6f4e37;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>☕ KopiGo</h1>
+
+        <!-- Tombol animasi ke halaman order -->
+        <a href="/order" id="cart-button" class="cart-button">🛒 Daftar Pesanan</a>
+
+        <form class="search-form">
+            <input type="text" name="search" placeholder="Cari kopi atau merchant..." 
+                   value="{{ search_query }}">
+            <button type="submit">Cari</button>
+        </form>
+
+        <div class="sort-buttons">
+            <a href="?sort=rating">Rating Tertinggi</a>
+            <a href="?sort=price">Harga Termurah</a>
+        </div>
+    </div>
+
+    <div class="shop-list">
+        {% if shops %}
+            {% for shop in shops %}
+            <div class="shop-card">
+                <h2>{{ shop.name }}</h2>
+                <div class="rating">⭐⭐⭐⭐ {{ shop.rating }}</div>
+                <div class="distance">📍 {{ shop.distance }} km</div>
+
+                <div class="menu">
+                    {% if shop.menu %}
+                        {% for item in shop.menu %}
+                        <div class="menu-item">
+                            <span class="item-name">{{ item.name }}</span>
+                            <span class="item-price">Rp{{ item.price }}</span>
+                            <form method="POST" action="/add_to_cart">
+                                <input type="hidden" name="shop_id" value="{{ shop.id }}">
+                                <input type="hidden" name="item_name" value="{{ item.name }}">
+                                <input type="number" name="quantity" value="1" min="1">
+                                <button type="submit">+ Keranjang</button>
+                            </form>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p>Menu belum tersedia.</p>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="no-results">🔍 Tidak ada kedai kopi atau menu yang cocok dengan pencarianmu.</p>
+        {% endif %}
+    </div>
+
+    <!-- JavaScript animasi tombol -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const cartButton = document.getElementById('cart-button');
+            cartButton.addEventListener('click', function (e) {
+                e.preventDefault(); // Tahan redirect
+                cartButton.classList.add('clicked');
+                setTimeout(() => {
+                    window.location.href = cartButton.href;
+                }, 400); // Sesuai durasi animasi
+            });
+        });
+    </script>
+</body>
+</html>
